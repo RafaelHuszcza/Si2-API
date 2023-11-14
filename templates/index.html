@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Library</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Open Library</h1>
+        <div class="form-container">
+            <label for="titulo">Título:</label>
+            <input type="text" id="titulo" placeholder="Digite o título">
+            <label for="autor">Autor:</label>
+            <input type="text" id="autor" placeholder="Digite o autor">
+            <label for="ordenacao">Ordenar por:</label>
+            <select id="ordenacao">
+                <option value="">Padrão</option>
+                <option value="new">Mais recente</option>
+                <option value="popularity">Mais popular</option>
+
+            </select>
+            <button onclick="buscarLivrosComFiltros()">Buscar</button>
+            <button onclick="limparResultado()">Limpar Resultado</button>
+        </div>
+        <div id="resultado" class="livros-container"></div>
+        <div class="pagination" id="pagination"></div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>
