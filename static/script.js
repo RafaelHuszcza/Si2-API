@@ -1,116 +1,175 @@
 const apiUrl = 'https://openlibrary.org/search.json';
-let paginaAtual = 1;
-const livrosPorPagina = 6;
+const booksPerPage = 6;
+
 let data;
+let currentPage = 1;
 
-function buscarLivrosComFiltros() {
-    const tituloInput = document.getElementById('titulo');
-    const autorInput = document.getElementById('autor');
-    const queryInput = document.getElementById('query');
 
-    const titulo = tituloInput.value.trim();
-    const autor = autorInput.value.trim();
-    const query = queryInput.value.trim();
 
-    const parametros = [];
 
-    if (titulo) {
-        parametros.push(`title=${encodeURIComponent(titulo)}`);
+
+
+function searchBooksWithFilters() {
+    const title = document.getElementById('title')?.value.trim();
+    const author = document.getElementById('author')?.value.trim();
+    const sorting = document.getElementById('sorting')?.value
+    const parameters = [];
+    if (title) {
+        parameters.push(`title=${encodeURIComponent(title)}`);
     }
-
-    if (autor) {
-        parametros.push(`author=${encodeURIComponent(autor)}`);
+    if (author) {
+        parameters.push(`author=${encodeURIComponent(author)}`);
     }
-
-
-    const ordenacaoSelect = document.getElementById('ordenacao');
-    const ordenacao = ordenacaoSelect.value;
-    if (ordenacao) {
-        parametros.push(`sort=${encodeURIComponent(ordenacao)}`);
+    if (sorting) {
+        parameters.push(`sort=${encodeURIComponent(sorting)}`);
     }
+    const url = `${apiUrl}?${parameters.join('&')}&page=${currentPage}`;
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Incapaz de recuperar resultados. Por favor, tente novamente.');
+            }
+            return response.json();
+        })
+        .then(resultData => {
+            displayResults(resultData);
+        })
+        .catch(error => {
+            console.error('Request error:', error);
+            alert(error.message);
+        });
+}
 
-    const url = `${apiUrl}?${parametros.join('&')}&page=${paginaAtual}`;
+function reSort() {
+    const title = document.getElementById('title')?.value.trim();
+    const author = document.getElementById('author')?.value.trim();
+    const sorting = document.getElementById('sorting')?.value
+    const query = document.getElementById('query')?.value.trim();
+    const parameters = [];
+    if (title) {
+        parameters.push(`title=${encodeURIComponent(title)}`);
+    }
+    if (author) {
+        parameters.push(`author=${encodeURIComponent(author)}`);
+    }
+    if (query && !author && !title) {
+        parameters.push(`q=${encodeURIComponent(query)}`);
+    }
+    if (sorting) {
+        parameters.push(`sort=${encodeURIComponent(sorting)}`);
+    }
+    if (!sorting && !query && !author && !title) {
+        console.log('no filters');
+    }
+    const url = `${apiUrl}?${parameters.join('&')}&page=${currentPage}`;
 
     fetch(url)
         .then(response => {
             if (!response.ok) {
-                throw new Error('Não foi possível obter os resultados. Tente novamente.');
+                throw new Error('Incapaz de recuperar resultados. Por favor, tente novamente.');
             }
             return response.json();
         })
         .then(resultData => {
             console.log(resultData);
-            data = resultData;
-            exibirResultado(data);
+            displayResults(resultData);
         })
         .catch(error => {
-            console.error('Erro na solicitação:', error);
+            console.error('Request error:', error);
+            alert(error.message);
+        });
+}
+function searchBooks() {
+    const query = document.getElementById('query')?.value.trim();
+    const sorting = document.getElementById('sorting')?.value
+    const parameters = [];
+    if (query) {
+        parameters.push(`q=${encodeURIComponent(query)}`);
+    }
+    if (sorting) {
+        parameters.push(`sort=${encodeURIComponent(sorting)}`);
+    }
+    const url = `${apiUrl}?${parameters.join('&')}&page=${currentPage}`;
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Incapaz de recuperar resultados. Por favor, tente novamente.');
+            }
+            return response.json();
+        })
+        .then(resultData => {
+            console.log(resultData);
+            displayResults(resultData);
+        })
+        .catch(error => {
+            console.error('Request error:', error);
             alert(error.message);
         });
 }
 
-function exibirResultado(data) {
-    const resultadoDiv = document.getElementById('resultado');
+function displayResults(data) {
+    const resultDiv = document.getElementById('result');
+    const noResults = document.getElementById('noResults');
     const paginationDiv = document.getElementById('pagination');
 
-    resultadoDiv.innerHTML = '';
-    paginationDiv.innerHTML = '';
-
     if (data.docs.length === 0) {
-        resultadoDiv.innerHTML = '<p>Nenhum livro encontrado.</p>';
+        noResults.classList.add("visible");
         return;
     }
+    noResults.classList.remove("visible");
 
-    const startIndex = (paginaAtual - 1) * livrosPorPagina;
-    const endIndex = startIndex + livrosPorPagina;
-    const livrosExibidos = data.docs.slice(startIndex, endIndex);
+    const startIndex = (currentPage - 1) * booksPerPage;
+    const endIndex = startIndex + booksPerPage;
+    const displayedBooks = data.docs.slice(startIndex, endIndex);
+    resultDiv.innerHTML = ``;
+    displayedBooks.forEach(book => {
+        const bookDiv = document.createElement('div');
+        bookDiv.classList.add('book');
 
-    livrosExibidos.forEach(livro => {
-        const livroDiv = document.createElement('div');
-        livroDiv.classList.add('livro');
-
-        const capa = livro.cover_i
-            ? `<img src="https://covers.openlibrary.org/b/id/${livro.cover_i}-M.jpg" alt="${livro.title}">`
-            : '<p class="sem-capa">Capa não disponível</p>';
-
-        const titulo = `<h2>${livro.title}</h2>`;
-        const autor = `<p class="autor">Autor: ${livro.author_name ? livro.author_name.join(', ') : 'N/A'}</p>`;
-
-        livroDiv.innerHTML = `${capa}${titulo}${autor}`;
-        resultadoDiv.appendChild(livroDiv);
+        const cover = book.cover_i
+            ? `<img src="https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg" alt="${book.title}">`
+            : '<p class="no-cover">Cover not available</p>';
+        const infos = `<div class="book-info">
+        <h3>${book.title}</h3>
+        <p class="author">Author: ${book.author_name ? book.author_name.join(', ') : 'N/A'}</p>
+        </div>
+        `
+        bookDiv.innerHTML = `${cover}${infos}`;
+        resultDiv.appendChild(bookDiv);
     });
 
-    const numPags = Math.ceil(data.numFound / livrosPorPagina);
+    const numPages = Math.ceil(data.numFound / booksPerPage);
 
-    paginationDiv.innerHTML = `<p>Página ${paginaAtual} de ${numPags}</p>`;
+    paginationDiv.innerHTML = `<p>Page ${currentPage} of ${numPages}</p>`;
 
-    if (numPags > 1) {
+    if (numPages > 1) {
         paginationDiv.innerHTML += `
-            <button onclick="irParaPagina(${paginaAtual - 1})" ${paginaAtual === 1 ? 'disabled' : ''}>Anterior</button>
-            <span>
-                Ir para página: 
-                <input type="number" id="inputPagina" min="1" max="${numPags}" value="${paginaAtual}" />
-                <button onclick="irParaPagina(document.getElementById('inputPagina').value)">Ir</button>
-            </span>
-            <button onclick="irParaPagina(${paginaAtual + 1})" ${paginaAtual === numPags ? 'disabled' : ''}>Próxima</button>
+            <button class="button" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
+            <button class="button" onclick="goToPage(${currentPage + 1})" ${currentPage === numPages ? 'disabled' : ''}>Next</button>
+            <div class="search">
+            Go to page: 
+            <input type="number" id="inputPage" min="1" max="${numPages}" value="${currentPage}" />
+            <button class="button" onclick="goToPage(document.getElementById('inputPage').value)">Go</button>
+        </div>
         `;
     }
 }
 
-function limparResultado() {
-    const resultadoDiv = document.getElementById('resultado');
+function clearResults() {
+    const resultDiv = document.getElementById('result');
     const paginationDiv = document.getElementById('pagination');
-    resultadoDiv.innerHTML = '';
+    resultDiv.innerHTML = '';
     paginationDiv.innerHTML = '';
+    noResults.classList.remove("visible");
 }
 
-function irParaPagina(pagina) {
-    const numPags = Math.ceil(data.numFound / livrosPorPagina);
+function goToPage(page) {
+    const numPages = Math.ceil(data.numFound / booksPerPage);
 
-    if (pagina >= 1 && pagina <= numPags) {
-        paginaAtual = pagina;
-        buscarLivrosComFiltros();
+    if (page >= 1 && page <= numPages) {
+        currentPage = page;
+        searchBooksWithFilters();
     } else {
-        alert(`Digite um número entre 1 e ${numPags}.`);
+        alert(`Enter a number between 1 and ${numPages}.`);
     }
 }

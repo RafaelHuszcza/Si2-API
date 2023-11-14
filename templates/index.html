@@ -4,32 +4,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open Library</title>
+    <title>LR Livraria</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
-    <div class="container">
-        <h1>Open Library</h1>
-        <div class="form-container">
-            <label for="titulo">Título:</label>
-            <input type="text" id="titulo" placeholder="Digite o título">
-            <label for="autor">Autor:</label>
-            <input type="text" id="autor" placeholder="Digite o autor">
-            <label for="ordenacao">Ordenar por:</label>
-            <select id="ordenacao">
-                <option value="">Padrão</option>
-                <option value="new">Mais recente</option>
-                <option value="popularity">Mais popular</option>
-
-            </select>
-            <button onclick="buscarLivrosComFiltros()">Buscar</button>
-            <button onclick="limparResultado()">Limpar Resultado</button>
+    <header>
+        <h1>LR Livraria</h1>
+        <div class="search">
+            <div class="search-input">
+                <label>Pesquisa Geral
+                    <input type="text" id="query" placeholder="Machado de Assis Dom Casmurro">
+                </label>
+                <button onclick="searchBooks()" class="button">
+                    <iconify-icon icon="iconamoon:search" style="color: white;" width="16"></iconify-icon>
+                </button>
+            </div>
         </div>
-        <div id="resultado" class="livros-container"></div>
-        <div class="pagination" id="pagination"></div>
-    </div>
+        <div class="separator">
+            <p>Ou</p>
+        </div>
+        <div class="advanced-search">
+            <div class="search-input">
+                <label for="title">Título <input type="text" id="title" placeholder="Dom Casmurro"></label>
+
+                <label for="author">Autor <input type="text" id="author" placeholder="Machado de Assis"></label>
+
+                <button onclick="searchBooksWithFilters()" class="button">
+                    <iconify-icon icon="iconamoon:search" style="color: white;" width="16"></iconify-icon>
+                </button>
+            </div>
+        </div>
+        </div>
+    </header>
+    <main>
+        <div class="sorting-options">
+            <label for="sorting">Ordenação
+                <select onchange="reSort()" id="sorting">
+                    <option value="">Padrão</option>
+                    <option value="new">Mais Recente</option>
+                    <option value="rating">Melhor Classificado</option>
+                </select>
+            </label>
+
+            <button class="button" onclick="clearResults()">Limpar Resultado</button>
+        </div>
+        <div id="noResults" class="noResults">
+            <p>Nenhum Livro encontrado
+            <p>
+        </div>
+
+        <div id="result" class="books-container">
+
+        </div>
+    </main>
+
+
+    <footer class="pagination" id="pagination"></footer>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 </body>
 
 </html>
