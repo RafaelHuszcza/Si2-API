@@ -3,11 +3,7 @@ const booksPerPage = 6;
 
 let data;
 let currentPage = 1;
-
-
-
-
-
+let numPages;
 
 function searchBooksWithFilters() {
     const title = document.getElementById('title')?.value.trim();
@@ -98,7 +94,6 @@ function searchBooks() {
             return response.json();
         })
         .then(resultData => {
-            console.log(resultData);
             displayResults(resultData);
         })
         .catch(error => {
@@ -111,7 +106,7 @@ function displayResults(data) {
     const resultDiv = document.getElementById('result');
     const noResults = document.getElementById('noResults');
     const paginationDiv = document.getElementById('pagination');
-
+    resultDiv.innerHTML = ``;
     if (data.docs.length === 0) {
         noResults.classList.add("visible");
         return;
@@ -121,7 +116,7 @@ function displayResults(data) {
     const startIndex = (currentPage - 1) * booksPerPage;
     const endIndex = startIndex + booksPerPage;
     const displayedBooks = data.docs.slice(startIndex, endIndex);
-    resultDiv.innerHTML = ``;
+
     displayedBooks.forEach(book => {
         const bookDiv = document.createElement('div');
         bookDiv.classList.add('book');
@@ -138,7 +133,7 @@ function displayResults(data) {
         resultDiv.appendChild(bookDiv);
     });
 
-    const numPages = Math.ceil(data.numFound / booksPerPage);
+    numPages = Math.ceil(data.numFound / booksPerPage);
 
     paginationDiv.innerHTML = `<p>Page ${currentPage} of ${numPages}</p>`;
 
@@ -164,11 +159,9 @@ function clearResults() {
 }
 
 function goToPage(page) {
-    const numPages = Math.ceil(data.numFound / booksPerPage);
-
     if (page >= 1 && page <= numPages) {
         currentPage = page;
-        searchBooksWithFilters();
+        reSort();
     } else {
         alert(`Enter a number between 1 and ${numPages}.`);
     }
