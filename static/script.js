@@ -6,6 +6,7 @@ let currentPage = 1;
 let numPages;
 
 function searchBooksWithFilters() {
+  currentPage = 1
   const title = document.getElementById('title')?.value.trim();
   const author = document.getElementById('author')?.value.trim();
   const sorting = document.getElementById('sorting')?.value;
@@ -80,6 +81,7 @@ function reSort() {
     });
 }
 function searchBooks() {
+  currentPage = 1
   const query = document.getElementById('query')?.value.trim();
   const sorting = document.getElementById('sorting')?.value;
   const parameters = [];
@@ -137,8 +139,7 @@ function openModalWithBook(book) {
   ).innerHTML = `<span>ISBN:</span> ${book.isbn[0]}`;
   document.getElementById(
     'book-language'
-  ).innerHTML = `Esse livro foi escrito em ${book.language.length} idioma${
-    book.language.length != 1 ? 's' : ''
+  ).innerHTML = `Esse livro foi escrito em ${book.language.length} idioma${book.language.length != 1 ? 's' : ''
   }`;
 }
 
@@ -147,7 +148,6 @@ function closeModal() {
 }
 
 function displayResults(data) {
-  console.log(data);
   const resultDiv = document.getElementById('result');
   const noResults = document.getElementById('noResults');
   const paginationDiv = document.getElementById('pagination');
@@ -171,9 +171,8 @@ function displayResults(data) {
       : '<p class="no-cover">Capa indisponivel</p>';
     const infos = `<div class="book-info">
         <h3>${book.title}</h3>
-        <p class="author">Autor(a): ${
-          book.author_name ? book.author_name.join(', ') : 'N/A'
-        }</p>
+        <p class="author">Autor(a): ${book.author_name ? book.author_name.join(', ') : 'N/A'
+      }</p>
         </div>
         `;
     bookDiv.innerHTML = `${cover}${infos}`;
@@ -189,12 +188,10 @@ function displayResults(data) {
 
   if (numPages > 1) {
     paginationDiv.innerHTML += `
-            <button class="button" onclick="goToPage(${currentPage - 1})" ${
-      currentPage === 1 ? 'disabled' : ''
-    }>Anterior</button>
-            <button class="button" onclick="goToPage(${currentPage + 1})" ${
-      currentPage === numPages ? 'disabled' : ''
-    }>Proxima</button>
+            <button class="button" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''
+      }>Anterior</button>
+            <button class="button" onclick="goToPage(${currentPage + 1})" ${currentPage === numPages ? 'disabled' : ''
+      }>Proxima</button>
             <div class="search">
             Ir para a pagina: 
             <input type="number" id="inputPage" min="1" max="${numPages}" value="${currentPage}" />
